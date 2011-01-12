@@ -20,6 +20,12 @@ echo "Creating chroot jail for nginx..."
 
 mkdir -p ${NGINX_JAIL}
 
+echo "Creating nginx user..."
+# http://www.cyberciti.biz/faq/rhel-linux-install-nginx-as-reverse-proxy-load-balancer/
+useradd -s /usr/sbin/nologin -d ${NGINX_JAIL} -M nginx
+# lock the account
+passwd -l nginx
+
 # Step #2: Create Isolated Environment
 echo "Creating basic filesystem structure..."
 mkdir -p ${NGINX_JAIL}/{etc,etc/nginx,dev,var,var/log,var/log/nginx,/var/lib,/var/lib/nginx,var/run,usr,usr/sbin,tmp,var/tmp,lib64,home,home/nginx}
@@ -48,7 +54,7 @@ ${INSTALL_FILES}/n2chroot /usr/sbin/nginx
 /bin/cp -fv /lib64/* ${NGINX_JAIL}/lib64
 
 # apparently, n2chroot misses these two libs:
-/bin/cp -fv /lib/{libnss_compat.so.2,libnsl.so.1} ${NGINX_JAIL}/lib
+/bin/cp -fv /lib/{libnss_compat.so.2,libnsl.so.1,libnss_nis.so.2,libnss_files.so.2} ${NGINX_JAIL}/lib
 # if you are still missing libs, you can strace chrooted nginx as described here:
 # http://forum.nginx.org/read.php?2,163489,163540#msg-163540
 
@@ -67,12 +73,6 @@ cp -avr /etc/{ld.so.conf.d,prelink.conf.d} ${NGINX_JAIL}/etc
 echo "Copying nginx.conf to nginx jail to run as nginx user..."
 mv /home/installer/install_files/nginx.conf ${NGINX_JAIL}/etc/nginx
 chmod 644 ${NGINX_JAIL}/etc/nginx/nginx.conf
-
-echo "Creating nginx user..."
-# http://www.cyberciti.biz/faq/rhel-linux-install-nginx-as-reverse-proxy-load-balancer/
-useradd -s /usr/sbin/nologin -d ${NGINX_JAIL} -M nginx
-# lock the account
-passwd -l nginx
 
 chown nginx:nginx /home/nginx/home/nginx
 
