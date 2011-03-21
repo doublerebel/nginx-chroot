@@ -46,13 +46,13 @@ case "$1" in
 	;;
 	stop)
 		echo -n "Stopping $DESC: "
-		start-stop-daemon --stop --quiet --pidfile /var/run/$NAME.pid \
+		start-stop-daemon --stop --quiet --pidfile $CHROOT/var/run/$NAME.pid \
 			--chroot $CHROOT --exec $DAEMON || true
 		echo "$NAME."
 	;;
 	restart|force-reload)
 		echo -n "Restarting $DESC: "
-		start-stop-daemon --stop --quiet --pidfile /var/run/$NAME.pid \
+		start-stop-daemon --stop --quiet --pidfile $CHROOT/var/run/$NAME.pid \
 			--chroot $CHROOT --exec $DAEMON || true
 		sleep 1
 			test_nginx_config
@@ -64,7 +64,7 @@ case "$1" in
 		echo -n "Reloading $DESC configuration: "
 		test_nginx_config
 		start-stop-daemon --stop --signal HUP --quiet \
-			--pidfile /var/run/$NAME.pid --chroot $CHROOT --exec $DAEMON || true
+			--pidfile $CHROOT/var/run/$NAME.pid --chroot $CHROOT --exec $DAEMON || true
 		echo "$NAME."
 	;;
 	configtest)
@@ -77,7 +77,7 @@ case "$1" in
 		fi
 	;;
 	status)
-		status_of_proc -p /var/run/$NAME.pid "$DAEMON" nginx && exit 0 || exit $?
+		status_of_proc -p $CHROOT/var/run/$NAME.pid "$DAEMON" nginx && exit 0 || exit $?
 	;;
 	*)
 		echo "Usage: $NAME {start|stop|restart|reload|force-reload|status|configtest}" >&2
